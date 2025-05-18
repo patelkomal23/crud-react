@@ -1,156 +1,88 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
+import "./App.css";
 
-const App = () => {
-  const [expense, setExpense] = useState({});
-  const [expenses, setExpenses] = useState([]);
-  const [editId, setEditId] = useState(-1);
-  const editBtnRef = useRef();
-  const focusRef = useRef();
+function App() {
+  const [hovered, setHovered] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
 
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("expenses")) || [];
-    setExpenses(stored);
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setExpense({ ...expense, [name]: value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const id = Date.now();
-
-    if (editId === -1) {
-      const newList = [...expenses, { ...expense, id }];
-      setExpenses(newList);
-      localStorage.setItem("expenses", JSON.stringify(newList));
-    } else {
-      const updated = expenses.map((exp) =>
-        exp.id === editId ? { ...expense, id: editId } : exp
-      );
-      setExpenses(updated);
-      localStorage.setItem("expenses", JSON.stringify(updated));
-      setEditId(-1);
-      editBtnRef.current.innerText = "Add Expense";
-    }
-
-    setExpense({});
-  };
-
-  const handleDelete = (id) => {
-    const filtered = expenses.filter((exp) => exp.id !== id);
-    setExpenses(filtered);
-    localStorage.setItem("expenses", JSON.stringify(filtered));
-  };
-
-  const handleEdit = (id) => {
-    const selected = expenses.find((exp) => exp.id === id);
-    setExpense(selected);
-    setEditId(id);
-    editBtnRef.current.innerText = "Update Expense";
-    focusRef.current.focus();
-  };
+  const books = [
+    {
+      id: 1,
+      title: "The Great Gatsby",
+      image:
+           "y648.jpg"  
+    },
+    {
+      id: 2,
+      title: "1984 by George Orwell",
+      image:
+           "109_700x700.webp"  
+    },
+    {
+      id: 3,
+      title: "To Kill a Mockingbird",
+      image:
+           "download.png"  
+    },
+  ];
 
   return (
-    <div className="container mt-4">
-      <h2 className="text-center"> Daily Expense Tracker</h2>
-      <form onSubmit={handleSubmit} className="mb-4">
-        <div className="mb-3">
-          <label>Date</label>
-          <input
-            type="date"
-            className="form-control"
-            name="date"
-            value={expense.date || ""}
-            onChange={handleChange}
-            ref={focusRef}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label>Category</label>
-          <select
-            className="form-control"
-            name="category"
-            value={expense.category || ""}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select Category</option>
-            <option>Food</option>
-            <option>Travel</option>
-            <option>Shopping</option>
-            <option>Health</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div className="mb-3">
-          <label>Amount</label>
-          <input
-            type="number"
-            className="form-control"
-            name="amount"
-            value={expense.amount || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label>Description</label>
-          <input
-            type="text"
-            className="form-control"
-            name="description"
-            value={expense.description || ""}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <button ref={editBtnRef} type="submit" className="btn btn-primary">
-          Add Expense
-        </button>
-      </form>
+    <div className="container my-4">
+      <header className="bg-primary text-white p-3 mb-4 text-center rounded">
+        <h1
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          style={{ cursor: "pointer" }}
+        >
+          {hovered ? "Dive Into Amazing Stories!" : "Welcome to BookStore"}
+        </h1>
+      </header>
 
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Date</th>
-            <th>Category</th>
-            <th>Amount (₹)</th>
-            <th>Description</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {expenses.map((exp, idx) => (
-            <tr key={exp.id}>
-              <td>{idx + 1}</td>
-              <td>{exp.date}</td>
-              <td>{exp.category}</td>
-              <td>{exp.amount}</td>
-              <td>{exp.description}</td>
-              <td>
-                <button
-                  className="btn btn-warning btn-sm me-2"
-                  onClick={() => handleEdit(exp.id)}
+      <section className="row">
+        {books.map((book) => (
+          <div className="col-md-4 mb-4" key={book.id}>
+            <div className="card h-100 shadow-sm">
+              <img
+                src={book.image}
+                className="card-img-top"
+                alt={book.title}
+                style={{ height: "250px", objectFit: "cover" }}
+              />
+              <div className="card-body text-center">
+                <h5
+                  className="card-title"
+                  onClick={() =>
+                    setSelectedBook(selectedBook === book.id ? null : book.id)
+                  }
+                  style={{
+                    color: selectedBook === book.id ? "darkred" : "black",
+                    cursor: "pointer",
+                    transition: "color 0.3s",
+                  }}
                 >
-                  Edit
-                </button>
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => handleDelete(exp.id)}
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  {book.title}
+                </h5>
+              </div>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      <div className="text-center mt-4">
+        <input
+          type="text"
+          className="form-control w-50 mx-auto"
+          placeholder="Give your feedback and press Enter"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              alert("Thank you for your feedback!");
+              e.target.value = ""; 
+            }
+          }}
+        />
+      </div>
     </div>
   );
-};
+}
 
-export default App
+export default App;
